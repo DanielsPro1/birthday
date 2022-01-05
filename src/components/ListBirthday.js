@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Text, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import moment from "moment";
 import AddBirtday from "./AddBirtday";
 import ActionBar from "./ActionBar";
@@ -68,19 +68,47 @@ export default function Listbirthday(props) {
     setBirthday(birthdayTempArray);
     setPasaBirthday(pasaBirthdayTempArray);
   };
+
+  const deleteBirthday = (birthday) => {
+    Alert.alert(
+      "Eliminar cumpleaños",
+      `¿Estas seguro de eliminar el cumpleaños de ${birthday.name} ${birthday.lastname}`,
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+            text: "Eliminar",
+            onPress: () => {
+                db.collection(user.uid)
+                  .doc(birthday.id)
+                  .delete().then(() => {
+                      setReloadData()
+                  })
+            }
+        },
+      ],
+      {cancelable: false},
+    );
+  };
   return (
     <View style={styles.container}>
       {showList ? (
         <ScrollView style={styles.scrollView}>
           {birthday.map((item, index) => (
-            <Birthday key={index} birthday={item} />
+            <Birthday key={index} birthday={item} deleteBirthday={deleteBirthday} />
           ))}
           {pasaBirthday.map((item, index) => (
-            <Birthday key={index} birthday={item} />
+            <Birthday key={index} birthday={item} deleteBirthday={deleteBirthday} />
           ))}
         </ScrollView>
       ) : (
-        <AddBirtday user={user} setShowList={setShowList} setReloadData={setReloadData} />
+        <AddBirtday
+          user={user}
+          setShowList={setShowList}
+          setReloadData={setReloadData}
+        />
       )}
 
       <ActionBar showList={showList} setShowList={setShowList} />
